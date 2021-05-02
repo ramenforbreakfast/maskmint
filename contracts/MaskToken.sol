@@ -1,35 +1,43 @@
-pragma solidity ^0.7.3;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {ERC20Burnable, IERC20} from "../libs/openzeppelin/ERC20Burnable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-contract MaskToken is Initializable, ERC20Upgradeable {
+contract MaskToken is ERC20Burnable{
     string public name;
     string public symbol;
     uint8 public decimals = 18;
     uint256 public maskID;
+    IERC20 private nctContract;
     IERC721 private maskContract;
 
     uint256 constant SECONDS_IN_A_DAY = 86400;
     uint256 constant EMISSION_PER_DAY = 10 * (10**18);
     uint256 constant EMISSION_END = 1927206000;
 
-    using SafeMathUpgradeable for uint256;
+    using SafeMath for uint256;
 
-    function initialize(
-        string memory _name,
-        string memory _symbol,
-        uint256 maskID,
-        address issuer
-    ) public initializer {
+    modifier onlyForMaskOwner(address minter) {
+        address maskOwner = maskContract.ownerOf(maskID);
+        require(minter == maskOwner, "Only the mask owner can mint tokens!");
+    }
+
+    /**
+     * @notice Token contract constructor, allows anyone to deploy the contract, however contract will always be initialized with zero token supply.
+     * @param _name token name
+     * @param _symbol token symbol
+     * @param _maskID ID of the hashmask to be bound to this token contract
+     */
+    constructor (string memory _name, string memory _symbol, uint256 _maskID) public {
+        require
         name = _name;
         symbol = _symbol;
-        maskID = maskID;
-        maskContract = IERC721(0xc2c747e0f7004f9e8817db2ca4997657a7746928);
+        maskID = _maskID;
+        nctContract = IERC20(0x8A9c4dfe8b9D8962B31e4e16F8321C44d48e246E);
+        maskContract = IERC721(0xC2C747E0F7004F9E8817Db2ca4997657a7746928);
         _totalSupply = 0;
-        _balances[issuer] = totalSupply;
-        emit Transfer(address(0x0), issuer, totalSupply);
     }
 
     function nctAccumulated() internal pure returns (uint256 currAccumulated) {
@@ -41,17 +49,19 @@ contract MaskToken is Initializable, ERC20Upgradeable {
         return currAccumulated;
     }
 
-    modifier onlyForMaskOwner(address minter) {
-        address maskOwner = maskContract.ownerOf(maskID);
-        require(minter == maskOwner, "Only the mask owner can mint tokens!");
-    }
-
     function mint(address minter, uint256 amount)
         external
         onlyForMaskOwner(minter)
     {
         uint256 maxSupply = nctAccumulated();
         require((_totalSupply + amount) <= maxSupply);
+        nctContract.approve(minter, amount);
+        nctContract.transferFrom(minter, address(this), amount);
+        nctContract.burn(amount);
         _mint(minter, amount);
+    }
+
+    function changeName(string memory _name) public onlyForMaskOwner(msg.sender) {
+        name = _name;
     }
 }
