@@ -1,6 +1,5 @@
 pragma solidity >=0.7.0 <=0.8.0;
 
-// SPDX-License-Identifier: MIT
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
@@ -68,6 +67,11 @@ interface IERC20 {
         address recipient,
         uint256 amount
     ) external returns (bool);
+
+    /**
+     * TODO: Add comment
+     */
+    function burn(uint256 burnQuantity) external returns (bool);
 
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to

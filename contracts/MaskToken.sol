@@ -1,17 +1,21 @@
-pragma solidity ^0.8.0;
+pragma solidity >=0.7.0 <=0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import {ERC20Burnable, IERC20} from "../libs/openzeppelin/ERC20Burnable.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC20 as NCT_IERC20} from "../libs/hashmasks/openzeppelin/IERC20.sol";
+import {
+    IERC721 as HM_IERC721
+} from "../libs/hashmasks/openzeppelin/IERC721.sol";
+import {
+    ERC20,
+    ERC20Burnable,
+    IERC20
+} from "../libs/openzeppelin/ERC20Burnable.sol";
 
-contract MaskToken is ERC20Burnable{
-    string public name;
-    string public symbol;
-    uint8 public decimals = 18;
+contract MaskToken is ERC20Burnable {
     uint256 public maskID;
-    IERC20 private nctContract;
-    IERC721 private maskContract;
+    NCT_IERC20 private nctContract;
+    HM_IERC721 private maskContract;
 
     uint256 constant SECONDS_IN_A_DAY = 86400;
     uint256 constant EMISSION_PER_DAY = 10 * (10**18);
@@ -22,25 +26,26 @@ contract MaskToken is ERC20Burnable{
     modifier onlyForMaskOwner(address minter) {
         address maskOwner = maskContract.ownerOf(maskID);
         require(minter == maskOwner, "Only the mask owner can mint tokens!");
+        _;
     }
 
     /**
      * @notice Token contract constructor, allows anyone to deploy the contract, however contract will always be initialized with zero token supply.
-     * @param _name token name
-     * @param _symbol token symbol
+     * @param name token name
+     * @param symbol token symbol
      * @param _maskID ID of the hashmask to be bound to this token contract
      */
-    constructor (string memory _name, string memory _symbol, uint256 _maskID) public {
-        require
-        name = _name;
-        symbol = _symbol;
+    constructor(
+        string memory name,
+        string memory symbol,
+        uint256 _maskID
+    ) ERC20(name, symbol) {
         maskID = _maskID;
-        nctContract = IERC20(0x8A9c4dfe8b9D8962B31e4e16F8321C44d48e246E);
-        maskContract = IERC721(0xC2C747E0F7004F9E8817Db2ca4997657a7746928);
-        _totalSupply = 0;
+        nctContract = NCT_IERC20(0x8A9c4dfe8b9D8962B31e4e16F8321C44d48e246E);
+        maskContract = HM_IERC721(0xC2C747E0F7004F9E8817Db2ca4997657a7746928);
     }
 
-    function nctAccumulated() internal pure returns (uint256 currAccumulated) {
+    function nctAccumulated() internal view returns (uint256 currAccumulated) {
         uint256 accumulationPeriod =
             block.timestamp < EMISSION_END ? block.timestamp : EMISSION_END;
         currAccumulated = accumulationPeriod.mul(EMISSION_PER_DAY).div(
@@ -54,14 +59,20 @@ contract MaskToken is ERC20Burnable{
         onlyForMaskOwner(minter)
     {
         uint256 maxSupply = nctAccumulated();
-        require((_totalSupply + amount) <= maxSupply);
+        require((totalSupply() + amount) <= maxSupply);
         nctContract.approve(minter, amount);
         nctContract.transferFrom(minter, address(this), amount);
         nctContract.burn(amount);
         _mint(minter, amount);
     }
 
-    function changeName(string memory _name) public onlyForMaskOwner(msg.sender) {
-        name = _name;
+    function changeName(string memory name)
+        public
+        onlyForMaskOwner(msg.sender)
+    {
+        _changeName(name);
+        emit NameChange(name);
     }
+
+    event NameChange(string name);
 }

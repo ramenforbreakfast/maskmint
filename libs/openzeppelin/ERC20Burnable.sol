@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity >=0.7.0 <=0.8.0;
 
 import "./ERC20.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
@@ -33,7 +33,10 @@ abstract contract ERC20Burnable is Context, ERC20 {
      */
     function burnFrom(address account, uint256 amount) public virtual {
         uint256 currentAllowance = allowance(account, _msgSender());
-        require(currentAllowance >= amount, "ERC20: burn amount exceeds allowance");
+        require(
+            currentAllowance >= amount,
+            "ERC20: burn amount exceeds allowance"
+        );
         _approve(account, _msgSender(), currentAllowance - amount);
         _burn(account, amount);
     }
