@@ -1,24 +1,23 @@
 pragma solidity ^0.7.0;
 
-import "./ERC165/IERC165.sol";
-import "./ERC165/ERC165.sol";
-import "./utils/Address.sol";
-import "./utils/EnumerableMap.sol";
-import "./utils/EnumerableSet.sol";
-import "./utils/SafeMath.sol";
-import "./utils/Strings.sol";
-import "./utils/Context.sol";
-import "./utils/Ownable.sol";
-import "./IERC20.sol";
+import "../libs/hashmasks/openzeppelin/ERC165/IERC165.sol";
+import "../libs/hashmasks/openzeppelin/ERC165/ERC165.sol";
+import "../libs/hashmasks/openzeppelin/utils/Address.sol";
+import "../libs/hashmasks/openzeppelin/utils/EnumerableMap.sol";
+import "../libs/hashmasks/openzeppelin/utils/EnumerableSet.sol";
+import "../libs/hashmasks/openzeppelin/utils/SafeMath.sol";
+import "../libs/hashmasks/openzeppelin/utils/Strings.sol";
+import "../libs/hashmasks/openzeppelin/utils/Context.sol";
+import "../libs/hashmasks/openzeppelin/utils/Ownable.sol";
+import "../libs/hashmasks/openzeppelin/ERC20/IERC20.sol";
 import "./IMasks.sol";
-import "./IERC721Enumerable.sol";
+import "../libs/hashmasks/openzeppelin/ERC721/IERC721Enumerable.sol";
 
 /**
  * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
  * @dev See https://eips.ethereum.org/EIPS/eip-721
  */
 interface IERC721Metadata is IERC721 {
-
     /**
      * @dev Returns the token collection name.
      */
@@ -45,7 +44,12 @@ interface IERC721Receiver {
      *
      * The selector can be obtained in Solidity with `IERC721.onERC721Received.selector`.
      */
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external returns (bytes4);
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4);
 }
 
 /**
@@ -62,14 +66,16 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     // Public variables
 
     // This is the provenance record of all Hashmasks artwork in existence
-    string public constant HASHMASKS_PROVENANCE = "df760c771ad006eace0d705383b74158967e78c6e980b35f670249b5822c42e1";
+    string public constant HASHMASKS_PROVENANCE =
+        "df760c771ad006eace0d705383b74158967e78c6e980b35f670249b5822c42e1";
 
     uint256 public constant SALE_START_TIMESTAMP = 1611846000;
 
     // Time after which hash masks are randomized and allotted
-    uint256 public constant REVEAL_TIMESTAMP = SALE_START_TIMESTAMP + (86400 * 14);
+    uint256 public constant REVEAL_TIMESTAMP =
+        SALE_START_TIMESTAMP + (86400 * 14);
 
-    uint256 public constant NAME_CHANGE_PRICE = 1830 * (10 ** 18);
+    uint256 public constant NAME_CHANGE_PRICE = 1830 * (10**18);
 
     uint256 public constant MAX_NFT_SUPPLY = 16384;
 
@@ -82,25 +88,25 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     bytes4 private constant _ERC721_RECEIVED = 0x150b7a02;
 
     // Mapping from holder address to their (enumerable) set of owned tokens
-    mapping (address => EnumerableSet.UintSet) private _holderTokens;
+    mapping(address => EnumerableSet.UintSet) private _holderTokens;
 
     // Enumerable mapping from token ids to their owners
     EnumerableMap.UintToAddressMap private _tokenOwners;
 
     // Mapping from token ID to approved address
-    mapping (uint256 => address) private _tokenApprovals;
+    mapping(uint256 => address) private _tokenApprovals;
 
     // Mapping from token ID to name
-    mapping (uint256 => string) private _tokenName;
+    mapping(uint256 => string) private _tokenName;
 
     // Mapping if certain name string has already been reserved
-    mapping (string => bool) private _nameReserved;
+    mapping(string => bool) private _nameReserved;
 
     // Mapping from token ID to whether the Hashmask was minted before reveal
-    mapping (uint256 => bool) private _mintedBeforeReveal;
+    mapping(uint256 => bool) private _mintedBeforeReveal;
 
     // Mapping from owner to operator approvals
-    mapping (address => mapping (address => bool)) private _operatorApprovals;
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
 
     // Token name
     string private _name;
@@ -145,12 +151,16 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     bytes4 private constant _INTERFACE_ID_ERC721_ENUMERABLE = 0x780e9d63;
 
     // Events
-    event NameChange (uint256 indexed maskIndex, string newName);
+    event NameChange(uint256 indexed maskIndex, string newName);
 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-    constructor (string memory name, string memory symbol, address nctAddress) {
+    constructor(
+        string memory name,
+        string memory symbol,
+        address nctAddress
+    ) {
         _name = name;
         _symbol = symbol;
         _nctAddress = nctAddress;
@@ -165,7 +175,10 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
      * @dev See {IERC721-balanceOf}.
      */
     function balanceOf(address owner) public view override returns (uint256) {
-        require(owner != address(0), "ERC721: balance query for the zero address");
+        require(
+            owner != address(0),
+            "ERC721: balance query for the zero address"
+        );
 
         return _holderTokens[owner].length();
     }
@@ -174,7 +187,11 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
      * @dev See {IERC721-ownerOf}.
      */
     function ownerOf(uint256 tokenId) public view override returns (address) {
-        return _tokenOwners.get(tokenId, "ERC721: owner query for nonexistent token");
+        return
+            _tokenOwners.get(
+                tokenId,
+                "ERC721: owner query for nonexistent token"
+            );
     }
 
     /**
@@ -194,7 +211,12 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     /**
      * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
      */
-    function tokenOfOwnerByIndex(address owner, uint256 index) public view override returns (uint256) {
+    function tokenOfOwnerByIndex(address owner, uint256 index)
+        public
+        view
+        override
+        returns (uint256)
+    {
         return _holderTokens[owner].at(index);
     }
 
@@ -209,7 +231,12 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     /**
      * @dev See {IERC721Enumerable-tokenByIndex}.
      */
-    function tokenByIndex(uint256 index) public view override returns (uint256) {
+    function tokenByIndex(uint256 index)
+        public
+        view
+        override
+        returns (uint256)
+    {
         (uint256 tokenId, ) = _tokenOwners.at(index);
         return tokenId;
     }
@@ -217,21 +244,34 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     /**
      * @dev Returns name of the NFT at index.
      */
-    function tokenNameByIndex(uint256 index) public view returns (string memory) {
+    function tokenNameByIndex(uint256 index)
+        public
+        view
+        returns (string memory)
+    {
         return _tokenName[index];
     }
 
     /**
      * @dev Returns if the name has been reserved.
      */
-    function isNameReserved(string memory nameString) public view returns (bool) {
+    function isNameReserved(string memory nameString)
+        public
+        view
+        returns (bool)
+    {
         return _nameReserved[toLower(nameString)];
     }
 
     /**
      * @dev Returns if the NFT has been minted before reveal phase
      */
-    function isMintedBeforeReveal(uint256 index) public view override returns (bool) {
+    function isMintedBeforeReveal(uint256 index)
+        public
+        view
+        override
+        returns (bool)
+    {
         return _mintedBeforeReveal[index];
     }
 
@@ -239,40 +279,37 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
      * @dev Gets current Hashmask Price
      */
     function getNFTPrice() public view returns (uint256) {
-        require(block.timestamp >= SALE_START_TIMESTAMP, "Sale has not started");
+        require(
+            block.timestamp >= SALE_START_TIMESTAMP,
+            "Sale has not started"
+        );
         require(totalSupply() < MAX_NFT_SUPPLY, "Sale has already ended");
 
-        uint currentSupply = totalSupply();
-
-        if (currentSupply >= 16381) {
-            return 100000000000000000000; // 16381 - 16383 100 ETH
-        } else if (currentSupply >= 16000) {
-            return 3000000000000000000; // 16000 - 16380 3.0 ETH
-        } else if (currentSupply >= 15000) {
-            return 1700000000000000000; // 15000  - 15999 1.7 ETH
-        } else if (currentSupply >= 11000) {
-            return 900000000000000000; // 11000 - 14999 0.9 ETH
-        } else if (currentSupply >= 7000) {
-            return 500000000000000000; // 7000 - 10999 0.5 ETH
-        } else if (currentSupply >= 3000) {
-            return 300000000000000000; // 3000 - 6999 0.3 ETH
-        } else {
-            return 100000000000000000; // 0 - 2999 0.1 ETH 
-        }
+        uint256 currentSupply = totalSupply();
+        return 100000000000000000; // 0 - 2999 0.1 ETH
     }
 
     /**
-    * @dev Mints Masks
-    */
+     * @dev Mints Masks
+     */
     function mintNFT(uint256 numberOfNfts) public payable {
         require(totalSupply() < MAX_NFT_SUPPLY, "Sale has already ended");
         require(numberOfNfts > 0, "numberOfNfts cannot be 0");
-        require(numberOfNfts <= 20, "You may not buy more than 20 NFTs at once");
-        require(totalSupply().add(numberOfNfts) <= MAX_NFT_SUPPLY, "Exceeds MAX_NFT_SUPPLY");
-        require(getNFTPrice().mul(numberOfNfts) == msg.value, "Ether value sent is not correct");
+        require(
+            numberOfNfts <= 20,
+            "You may not buy more than 20 NFTs at once"
+        );
+        require(
+            totalSupply().add(numberOfNfts) <= MAX_NFT_SUPPLY,
+            "Exceeds MAX_NFT_SUPPLY"
+        );
+        require(
+            getNFTPrice().mul(numberOfNfts) == msg.value,
+            "Ether value sent is not correct"
+        );
 
-        for (uint i = 0; i < numberOfNfts; i++) {
-            uint mintIndex = totalSupply();
+        for (uint256 i = 0; i < numberOfNfts; i++) {
+            uint256 mintIndex = totalSupply();
             if (block.timestamp < REVEAL_TIMESTAMP) {
                 _mintedBeforeReveal[mintIndex] = true;
             }
@@ -280,9 +317,13 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
         }
 
         /**
-        * Source of randomness. Theoretical miner withhold manipulation possible but should be sufficient in a pragmatic sense
-        */
-        if (startingIndexBlock == 0 && (totalSupply() == MAX_NFT_SUPPLY || block.timestamp >= REVEAL_TIMESTAMP)) {
+         * Source of randomness. Theoretical miner withhold manipulation possible but should be sufficient in a pragmatic sense
+         */
+        if (
+            startingIndexBlock == 0 &&
+            (totalSupply() == MAX_NFT_SUPPLY ||
+                block.timestamp >= REVEAL_TIMESTAMP)
+        ) {
             startingIndexBlock = block.number;
         }
     }
@@ -293,11 +334,13 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     function finalizeStartingIndex() public {
         require(startingIndex == 0, "Starting index is already set");
         require(startingIndexBlock != 0, "Starting index block must be set");
-        
-        startingIndex = uint(blockhash(startingIndexBlock)) % MAX_NFT_SUPPLY;
+
+        startingIndex = uint256(blockhash(startingIndexBlock)) % MAX_NFT_SUPPLY;
         // Just a sanity case in the worst case if this function is called late (EVM only stores last 256 block hashes)
         if (block.number.sub(startingIndexBlock) > 255) {
-            startingIndex = uint(blockhash(block.number-1)) % MAX_NFT_SUPPLY;
+            startingIndex =
+                uint256(blockhash(block.number - 1)) %
+                MAX_NFT_SUPPLY;
         }
         // Prevent default sequence
         if (startingIndex == 0) {
@@ -313,10 +356,17 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
 
         require(_msgSender() == owner, "ERC721: caller is not the owner");
         require(validateName(newName) == true, "Not a valid new name");
-        require(sha256(bytes(newName)) != sha256(bytes(_tokenName[tokenId])), "New name is same as the current one");
+        require(
+            sha256(bytes(newName)) != sha256(bytes(_tokenName[tokenId])),
+            "New name is same as the current one"
+        );
         require(isNameReserved(newName) == false, "Name already reserved");
 
-        IERC20(_nctAddress).transferFrom(msg.sender, address(this), NAME_CHANGE_PRICE);
+        IERC20(_nctAddress).transferFrom(
+            msg.sender,
+            address(this),
+            NAME_CHANGE_PRICE
+        );
         // If already named, dereserve old name
         if (bytes(_tokenName[tokenId]).length > 0) {
             toggleReserveName(_tokenName[tokenId], false);
@@ -329,9 +379,9 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
 
     /**
      * @dev Withdraw ether from this contract (Callable by owner)
-    */
-    function withdraw() onlyOwner public {
-        uint balance = address(this).balance;
+     */
+    function withdraw() public onlyOwner {
+        uint256 balance = address(this).balance;
         msg.sender.transfer(balance);
     }
 
@@ -342,7 +392,8 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
         address owner = ownerOf(tokenId);
         require(to != owner, "ERC721: approval to current owner");
 
-        require(_msgSender() == owner || isApprovedForAll(owner, _msgSender()),
+        require(
+            _msgSender() == owner || isApprovedForAll(owner, _msgSender()),
             "ERC721: approve caller is not owner nor approved for all"
         );
 
@@ -352,8 +403,16 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     /**
      * @dev See {IERC721-getApproved}.
      */
-    function getApproved(uint256 tokenId) public view override returns (address) {
-        require(_exists(tokenId), "ERC721: approved query for nonexistent token");
+    function getApproved(uint256 tokenId)
+        public
+        view
+        override
+        returns (address)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721: approved query for nonexistent token"
+        );
 
         return _tokenApprovals[tokenId];
     }
@@ -361,7 +420,11 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     /**
      * @dev See {IERC721-setApprovalForAll}.
      */
-    function setApprovalForAll(address operator, bool approved) public virtual override {
+    function setApprovalForAll(address operator, bool approved)
+        public
+        virtual
+        override
+    {
         require(operator != _msgSender(), "ERC721: approve to caller");
 
         _operatorApprovals[_msgSender()][operator] = approved;
@@ -371,16 +434,28 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     /**
      * @dev See {IERC721-isApprovedForAll}.
      */
-    function isApprovedForAll(address owner, address operator) public view override returns (bool) {
+    function isApprovedForAll(address owner, address operator)
+        public
+        view
+        override
+        returns (bool)
+    {
         return _operatorApprovals[owner][operator];
     }
 
     /**
      * @dev See {IERC721-transferFrom}.
      */
-    function transferFrom(address from, address to, uint256 tokenId) public virtual override {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
         //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
+        require(
+            _isApprovedOrOwner(_msgSender(), tokenId),
+            "ERC721: transfer caller is not owner nor approved"
+        );
 
         _transfer(from, to, tokenId);
     }
@@ -388,15 +463,27 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     /**
      * @dev See {IERC721-safeTransferFrom}.
      */
-    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override {
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
         safeTransferFrom(from, to, tokenId, "");
     }
 
     /**
      * @dev See {IERC721-safeTransferFrom}.
      */
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public virtual override {
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) public virtual override {
+        require(
+            _isApprovedOrOwner(_msgSender(), tokenId),
+            "ERC721: transfer caller is not owner nor approved"
+        );
         _safeTransfer(from, to, tokenId, _data);
     }
 
@@ -418,9 +505,17 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
      *
      * Emits a {Transfer} event.
      */
-    function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual {
+    function _safeTransfer(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) internal virtual {
         _transfer(from, to, tokenId);
-        require(_checkOnERC721Received(from, to, tokenId, _data), "ERC721: transfer to non ERC721Receiver implementer");
+        require(
+            _checkOnERC721Received(from, to, tokenId, _data),
+            "ERC721: transfer to non ERC721Receiver implementer"
+        );
     }
 
     /**
@@ -442,10 +537,19 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
      *
      * - `tokenId` must exist.
      */
-    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view returns (bool) {
-        require(_exists(tokenId), "ERC721: operator query for nonexistent token");
+    function _isApprovedOrOwner(address spender, uint256 tokenId)
+        internal
+        view
+        returns (bool)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721: operator query for nonexistent token"
+        );
         address owner = ownerOf(tokenId);
-        return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender));
+        return (spender == owner ||
+            getApproved(tokenId) == spender ||
+            isApprovedForAll(owner, spender));
     }
 
     /**
@@ -466,9 +570,16 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
      * @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
      * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
      */
-    function _safeMint(address to, uint256 tokenId, bytes memory _data) internal virtual {
+    function _safeMint(
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) internal virtual {
         _mint(to, tokenId);
-        require(_checkOnERC721Received(address(0), to, tokenId, _data), "ERC721: transfer to non ERC721Receiver implementer");
+        require(
+            _checkOnERC721Received(address(0), to, tokenId, _data),
+            "ERC721: transfer to non ERC721Receiver implementer"
+        );
     }
 
     /**
@@ -532,8 +643,15 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
      *
      * Emits a {Transfer} event.
      */
-    function _transfer(address from, address to, uint256 tokenId) internal virtual {
-        require(ownerOf(tokenId) == from, "ERC721: transfer of token that is not own");
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual {
+        require(
+            ownerOf(tokenId) == from,
+            "ERC721: transfer of token that is not own"
+        );
         require(to != address(0), "ERC721: transfer to the zero address");
 
         _beforeTokenTransfer(from, to, tokenId);
@@ -549,7 +667,6 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
         emit Transfer(from, to, tokenId);
     }
 
-
     /**
      * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
      * The call is not executed if the target address is not a contract.
@@ -560,19 +677,26 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
      * @param _data bytes optional data to send along with the call
      * @return bool whether the call correctly returned the expected magic value
      */
-    function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory _data)
-        private returns (bool)
-    {
+    function _checkOnERC721Received(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) private returns (bool) {
         if (!to.isContract()) {
             return true;
         }
-        bytes memory returndata = to.functionCall(abi.encodeWithSelector(
-            IERC721Receiver(to).onERC721Received.selector,
-            _msgSender(),
-            from,
-            tokenId,
-            _data
-        ), "ERC721: transfer to non ERC721Receiver implementer");
+        bytes memory returndata =
+            to.functionCall(
+                abi.encodeWithSelector(
+                    IERC721Receiver(to).onERC721Received.selector,
+                    _msgSender(),
+                    from,
+                    tokenId,
+                    _data
+                ),
+                "ERC721: transfer to non ERC721Receiver implementer"
+            );
         bytes4 retval = abi.decode(returndata, (bytes4));
         return (retval == _ERC721_RECEIVED);
     }
@@ -597,7 +721,11 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual { }
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual {}
 
     /**
      * @dev Reserves the name if isReserve is set to true, de-reserves if set to false
@@ -609,27 +737,26 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     /**
      * @dev Check if the name string is valid (Alphanumeric and spaces without leading or trailing space)
      */
-    function validateName(string memory str) public pure returns (bool){
+    function validateName(string memory str) public pure returns (bool) {
         bytes memory b = bytes(str);
-        if(b.length < 1) return false;
-        if(b.length > 25) return false; // Cannot be longer than 25 characters
-        if(b[0] == 0x20) return false; // Leading space
+        if (b.length < 1) return false;
+        if (b.length > 25) return false; // Cannot be longer than 25 characters
+        if (b[0] == 0x20) return false; // Leading space
         if (b[b.length - 1] == 0x20) return false; // Trailing space
 
         bytes1 lastChar = b[0];
 
-        for(uint i; i<b.length; i++){
+        for (uint256 i; i < b.length; i++) {
             bytes1 char = b[i];
 
             if (char == 0x20 && lastChar == 0x20) return false; // Cannot contain continous spaces
 
-            if(
+            if (
                 !(char >= 0x30 && char <= 0x39) && //9-0
                 !(char >= 0x41 && char <= 0x5A) && //A-Z
                 !(char >= 0x61 && char <= 0x7A) && //a-z
                 !(char == 0x20) //space
-            )
-                return false;
+            ) return false;
 
             lastChar = char;
         }
@@ -640,10 +767,10 @@ contract Masks is Context, Ownable, ERC165, IMasks, IERC721Metadata {
     /**
      * @dev Converts the string to lowercase
      */
-    function toLower(string memory str) public pure returns (string memory){
+    function toLower(string memory str) public pure returns (string memory) {
         bytes memory bStr = bytes(str);
         bytes memory bLower = new bytes(bStr.length);
-        for (uint i = 0; i < bStr.length; i++) {
+        for (uint256 i = 0; i < bStr.length; i++) {
             // Uppercase character
             if ((uint8(bStr[i]) >= 65) && (uint8(bStr[i]) <= 90)) {
                 bLower[i] = bytes1(uint8(bStr[i]) + 32);

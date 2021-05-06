@@ -1,6 +1,4 @@
-pragma solidity >=0.7.0 <=0.8.0;
-
-import "./IERC165.sol";
+import "../ERC165/IERC165.sol";
 
 /**
  * @dev Required interface of an ERC721 compliant contract.

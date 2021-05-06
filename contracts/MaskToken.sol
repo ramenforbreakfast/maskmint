@@ -1,11 +1,13 @@
-pragma solidity >=0.7.0 <=0.8.0;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import {IERC20 as NCT_IERC20} from "../libs/hashmasks/openzeppelin/IERC20.sol";
+import {
+    IERC20 as NCT_IERC20
+} from "../libs/hashmasks/openzeppelin/ERC20/IERC20.sol";
 import {
     IERC721 as HM_IERC721
-} from "../libs/hashmasks/openzeppelin/IERC721.sol";
+} from "../libs/hashmasks/openzeppelin/ERC721/IERC721.sol";
 import {
     ERC20,
     ERC20Burnable,
@@ -38,11 +40,13 @@ contract MaskToken is ERC20Burnable {
     constructor(
         string memory name,
         string memory symbol,
-        uint256 _maskID
+        uint256 _maskID,
+        address nctContractAddress,
+        address maskContractAddress
     ) ERC20(name, symbol) {
         maskID = _maskID;
-        nctContract = NCT_IERC20(0x8A9c4dfe8b9D8962B31e4e16F8321C44d48e246E);
-        maskContract = HM_IERC721(0xC2C747E0F7004F9E8817Db2ca4997657a7746928);
+        nctContract = NCT_IERC20(nctContractAddress);
+        maskContract = HM_IERC721(maskContractAddress);
     }
 
     function nctAccumulated() internal view returns (uint256 currAccumulated) {
