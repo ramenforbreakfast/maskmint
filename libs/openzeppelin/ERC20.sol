@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.7.0 <=0.8.0;
+pragma solidity ^0.8.0;
 
 import "./IERC20.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
@@ -342,6 +342,10 @@ contract ERC20 is Context, IERC20 {
 
     function _changeName(string memory newName) internal virtual {
         _name = newName;
+    }
+
+    function _changeSymbol(string memory newSymbol) internal virtual {
+        _symbol = newSymbol;
     }
 
     /**

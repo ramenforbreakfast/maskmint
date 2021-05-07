@@ -27,7 +27,7 @@ contract MaskToken is ERC20Burnable {
 
     modifier onlyForMaskOwner(address minter) {
         address maskOwner = maskContract.ownerOf(maskID);
-        require(minter == maskOwner, "Only the mask owner can mint tokens!");
+        require(minter == maskOwner, "Operation may only be performed by mask owner!");
         _;
     }
 
@@ -58,16 +58,17 @@ contract MaskToken is ERC20Burnable {
         return currAccumulated;
     }
 
-    function mint(address minter, uint256 amount)
+    function mint(uint256 amount)
         external
-        onlyForMaskOwner(minter)
     {
+        address maskOwner = maskContract.ownerOf(maskID);
         uint256 maxSupply = nctAccumulated();
-        require((totalSupply() + amount) <= maxSupply);
-        nctContract.approve(minter, amount);
-        nctContract.transferFrom(minter, address(this), amount);
+        require((totalSupply() + amount) <= maxSupply, "Cannot mint more tokens than the amount of NCT a mask has accumulated so far!");
+        uint256 allowance = nctContract.allowance(msg.sender, address(this));
+        require(allowance >= amount, "Contract has not been given approval to spend NCT necessary for minting!");
+        nctContract.transferFrom(msg.sender, address(this), amount);
         nctContract.burn(amount);
-        _mint(minter, amount);
+        _mint(maskOwner, amount);
     }
 
     function changeName(string memory name)
@@ -79,4 +80,14 @@ contract MaskToken is ERC20Burnable {
     }
 
     event NameChange(string name);
+
+    function changeSymbol(string memory symbol)
+        public 
+        onlyForMaskOwner(msg.sender)
+    {
+        _changeSymbol(symbol);
+        emit SymbolChange(symbol);
+    }
+
+    event SymbolChange(string symbol);
 }
