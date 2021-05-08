@@ -2,8 +2,10 @@
 
 pragma solidity ^0.8.0;
 
-import "./IERC20.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "./IERC20Upgradeable.sol";
+import "./extensions/IERC20MetadataUpgradeable.sol";
+import "./utils/ContextUpgradeable.sol";
+import "./proxy/utils/Initializable.sol";
 
 /**
  * @dev Implementation of the {IERC20} interface.
@@ -29,7 +31,12 @@ import "@openzeppelin/contracts/utils/Context.sol";
  * functions have been added to mitigate the well-known issues around setting
  * allowances. See {IERC20-approve}.
  */
-contract ERC20 is Context, IERC20 {
+contract ERC20Upgradeable is
+    Initializable,
+    ContextUpgradeable,
+    IERC20Upgradeable,
+    IERC20MetadataUpgradeable
+{
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -45,10 +52,21 @@ contract ERC20 is Context, IERC20 {
      * The defaut value of {decimals} is 18. To select a different value for
      * {decimals} you should overload it.
      *
-     * All three of these values are immutable: they can only be set once during
+     * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory name_, string memory symbol_) {
+    function __ERC20_init(string memory name_, string memory symbol_)
+        internal
+        initializer
+    {
+        __Context_init_unchained();
+        __ERC20_init_unchained(name_, symbol_);
+    }
+
+    function __ERC20_init_unchained(string memory name_, string memory symbol_)
+        internal
+        initializer
+    {
         _name = name_;
         _symbol = symbol_;
     }
@@ -56,7 +74,7 @@ contract ERC20 is Context, IERC20 {
     /**
      * @dev Returns the name of the token.
      */
-    function name() public view virtual returns (string memory) {
+    function name() public view virtual override returns (string memory) {
         return _name;
     }
 
@@ -64,7 +82,7 @@ contract ERC20 is Context, IERC20 {
      * @dev Returns the symbol of the token, usually a shorter version of the
      * name.
      */
-    function symbol() public view virtual returns (string memory) {
+    function symbol() public view virtual override returns (string memory) {
         return _symbol;
     }
 
@@ -75,13 +93,13 @@ contract ERC20 is Context, IERC20 {
      *
      * Tokens usually opt for a value of 18, imitating the relationship between
      * Ether and Wei. This is the value {ERC20} uses, unless this function is
-     * overloaded;
+     * overridden;
      *
      * NOTE: This information is only used for _display_ purposes: it in
      * no way affects any of the arithmetic of the contract, including
      * {IERC20-balanceOf} and {IERC20-transfer}.
      */
-    function decimals() public view virtual returns (uint8) {
+    function decimals() public view virtual override returns (uint8) {
         return 18;
     }
 
@@ -340,12 +358,12 @@ contract ERC20 is Context, IERC20 {
         emit Approval(owner, spender, amount);
     }
 
-    function _changeName(string memory newName) internal virtual {
-        _name = newName;
+    function _changeName(string memory name_) internal virtual {
+        _name = name_;
     }
 
-    function _changeSymbol(string memory newSymbol) internal virtual {
-        _symbol = newSymbol;
+    function _changeSymbol(string memory symbol_) internal virtual {
+        _symbol = symbol_;
     }
 
     /**
@@ -367,4 +385,6 @@ contract ERC20 is Context, IERC20 {
         address to,
         uint256 amount
     ) internal virtual {}
+
+    uint256[45] private __gap;
 }

@@ -1,20 +1,15 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "../libs/openzeppelin/ERC20Upgradeable.sol";
 import {
     IERC20 as NCT_IERC20
 } from "../libs/hashmasks/openzeppelin/ERC20/IERC20.sol";
 import {
     IERC721 as HM_IERC721
 } from "../libs/hashmasks/openzeppelin/ERC721/IERC721.sol";
-import {
-    ERC20,
-    ERC20Burnable,
-    IERC20
-} from "../libs/openzeppelin/ERC20Burnable.sol";
 
-contract MaskToken is ERC20Burnable {
+contract MaskToken is ERC20Upgradeable {
     uint256 public maskID;
     NCT_IERC20 private nctContract;
     HM_IERC721 private maskContract;
@@ -27,24 +22,30 @@ contract MaskToken is ERC20Burnable {
 
     modifier onlyForMaskOwner(address minter) {
         address maskOwner = maskContract.ownerOf(maskID);
-        require(minter == maskOwner, "Operation may only be performed by mask owner!");
+        require(
+            minter == maskOwner,
+            "Operation may only be performed by mask owner!"
+        );
         _;
     }
 
     /**
      * @notice Token contract constructor, allows anyone to deploy the contract, however contract will always be initialized with zero token supply.
-     * @param name token name
-     * @param symbol token symbol
-     * @param _maskID ID of the hashmask to be bound to this token contract
+     * @param name_ token name
+     * @param symbol_ token symbol
+     * @param maskID_ ID of the hashmask to be bound to this token contract
+     * @param nctContractAddress address of NameChangeToken contract
+     * @param maskContractAddress address of Hashmask contract
      */
-    constructor(
-        string memory name,
-        string memory symbol,
-        uint256 _maskID,
+    function initialize(
+        string memory name_,
+        string memory symbol_,
+        uint256 maskID_,
         address nctContractAddress,
         address maskContractAddress
-    ) ERC20(name, symbol) {
-        maskID = _maskID;
+    ) public initializer {
+        __ERC20_init(name_, symbol_);
+        maskID = maskID_;
         nctContract = NCT_IERC20(nctContractAddress);
         maskContract = HM_IERC721(maskContractAddress);
     }
@@ -58,17 +59,46 @@ contract MaskToken is ERC20Burnable {
         return currAccumulated;
     }
 
-    function mint(uint256 amount)
-        external
-    {
+    function mint(uint256 amount) external {
         address maskOwner = maskContract.ownerOf(maskID);
         uint256 maxSupply = nctAccumulated();
-        require((totalSupply() + amount) <= maxSupply, "Cannot mint more tokens than the amount of NCT a mask has accumulated so far!");
+        require(
+            (totalSupply() + amount) <= maxSupply,
+            "Cannot mint more tokens than the amount of NCT a mask has accumulated so far!"
+        );
         uint256 allowance = nctContract.allowance(msg.sender, address(this));
-        require(allowance >= amount, "Contract has not been given approval to spend NCT necessary for minting!");
+        require(
+            allowance >= amount,
+            "Contract has not been given approval to spend NCT necessary for minting!"
+        );
         nctContract.transferFrom(msg.sender, address(this), amount);
         nctContract.burn(amount);
         _mint(maskOwner, amount);
+    }
+
+    function burn(uint256 amount) external {
+        _burn(_msgSender(), amount);
+    }
+
+    /**
+     * @dev Destroys `amount` tokens from `account`, deducting from the caller's
+     * allowance.
+     *
+     * See {ERC20-_burn} and {ERC20-allowance}.
+     *
+     * Requirements:
+     *
+     * - the caller must have allowance for ``accounts``'s tokens of at least
+     * `amount`.
+     */
+    function burnFrom(address account, uint256 amount) external {
+        uint256 currentAllowance = allowance(account, _msgSender());
+        require(
+            currentAllowance >= amount,
+            "ERC20: burn amount exceeds allowance"
+        );
+        _approve(account, _msgSender(), currentAllowance - amount);
+        _burn(account, amount);
     }
 
     function changeName(string memory name)
@@ -82,7 +112,7 @@ contract MaskToken is ERC20Burnable {
     event NameChange(string name);
 
     function changeSymbol(string memory symbol)
-        public 
+        public
         onlyForMaskOwner(msg.sender)
     {
         _changeSymbol(symbol);

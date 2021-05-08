@@ -46,7 +46,7 @@ describe("Testing Mask Mint & Mask Token Contracts", function () {
   });
 
   it("Deploy Mask Mint Contract", async function () {
-    
+
     mintContract = await ethers.getContractFactory("MaskMint");
     maskMint = await mintContract.deploy(nct.address, mask.address);
     await maskMint.deployed();
@@ -64,6 +64,14 @@ describe("Testing Mask Mint & Mask Token Contracts", function () {
     await expect(maskMint.deployToken("MaskTokenTwo", "TWO", 2)).to.be.revertedWith("Error: Token contract for this mask is already deployed!");
   });
 
+  it("Test Mask Mint Contract EnumerableMap Functions", async function () {
+    let numberOfContracts = await maskMint.getNumberOfDeployedContracts();
+    for (let i = 0; i < numberOfContracts; i++) {
+      console.log(await maskMint.getContractAtIndex(i));
+    }
+    await expect(maskMint.getContractAtIndex(3)).to.be.revertedWith("Error: Invalid index for deployed contracts");
+  })
+
   it("Test Mask Token Contract ERC-20", async function () {
     tokenContract = await ethers.getContractFactory("MaskToken");
     tokenZero = await tokenContract.attach(tokenZeroAddr);
@@ -74,13 +82,13 @@ describe("Testing Mask Mint & Mask Token Contracts", function () {
     expect(await tokenTwo.symbol()).to.equal("TWO");
     // I am using the parseEther function here since ERC-20s share 18 decimal point format with ETH
     await expect(tokenZero.connect(addr3).mint(ethers.utils.parseEther("10"))).to.be.revertedWith("Contract has not been given approval to spend NCT necessary for minting!");
-    
+
     await nct.connect(addr1).transfer(addr3.address, ethers.utils.parseEther("10"));
     await nct.connect(addr3).approve(tokenZeroAddr, ethers.utils.parseEther("10"));
     await tokenZero.connect(addr3).mint(ethers.utils.parseEther("10"));
     expect(await tokenZero.balanceOf(addr3.address)).to.equal(ethers.utils.parseEther("0"));
     expect(await tokenZero.balanceOf(addr1.address)).to.equal(ethers.utils.parseEther("10"));
-    
+
     await tokenZero.connect(addr1).burn(ethers.utils.parseEther("10"));
     expect(await tokenZero.balanceOf(addr1.address)).to.equal(0);
 
