@@ -1,0 +1,7 @@
+.navlink {
+    @apply border-2 rounded m-2 p-1 font-mono bg-yellow-500 border-gray-600
+}
+
+.active {
+    @apply bg-yellow-600 border-gray-800
+}

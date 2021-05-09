@@ -12,7 +12,9 @@ export default function Page(props: Props) {
         <div className="flex flex-col">
             <Header />
             <NavBar />
-            {children}
+            <div className="bg-gray-200">
+                {children}
+            </div>
         </div>
     )
 }
