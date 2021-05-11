@@ -9,11 +9,11 @@ interface Props {
 
 export default function NavBar() {
     return (
-        <div className="flex flex-row justify-center bg-cyan-400">
+        <div className="flex flex-row justify-center bg-cyan-400 h-12">
             <NavLink className="navlink" activeClassName="active" exact to="/">About</NavLink>
-            <NavLink className="navlink" activeClassName="active" exact to="/browse">Browse</NavLink>
-            <NavLink className="navlink" activeClassName="active" exact to="/manage">Manage</NavLink>
-            <NavLink className="navlink" activeClassName="active" exact to="/sponsor">Sponsor</NavLink>
+            <NavLink className="navlink" activeClassName="active" to="/browse">Browse</NavLink>
+            <NavLink className="navlink" activeClassName="active" to="/manage">Manage</NavLink>
+            <NavLink className="navlink" activeClassName="active" to="/sponsor">Sponsor</NavLink>
         </div>
     )
 }
