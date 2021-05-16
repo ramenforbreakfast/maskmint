@@ -1,14 +1,15 @@
-const { ethers } = require("hardhat");
+import { run, ethers } from "hardhat";
 
 async function main() {
     let nct, mask, maskMint;
     let i;
+    let owner, addr1, addr2, addr3, addr4;
     let userAddresses = await ethers.getSigners();
     [owner, addr1, addr2, addr3, addr4] = userAddresses;
-    console.log("Showing First 5 Addresses...")
+    console.log("Showing First 5 Addresses...");
     for (i = 0; i < 5; i++) {
-      console.log("Address: ", userAddresses[i].address);
-      console.log("Balance: ", (await userAddresses[i].getBalance()).toString());
+        console.log("Address: ", userAddresses[i].address);
+        console.log("Balance: ", (await userAddresses[i].getBalance()).toString());
     }
 
     const nctContract = await ethers.getContractFactory("NameChangeToken");
@@ -20,7 +21,6 @@ async function main() {
     mask = await maskContract.deploy("Hashmasks", "HM", nct.address);
     await mask.deployed();
     console.log("HashMask Contract Deployed At: ", mask.address);
-
     await nct.connect(owner).setMasksAddress(mask.address);
 
     const mintContract = await ethers.getContractFactory("MaskMint");

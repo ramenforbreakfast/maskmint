@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+import { expect } from "chai";
+import { run, ethers } from "hardhat";
 
 let owner, addr1, addr2, addr3, addr4;
 let mask, nct, maskMint, tokenZero, tokenTwo;

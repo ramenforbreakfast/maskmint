@@ -1,8 +1,9 @@
 import * as React from 'react'
+import { ConnectWallet } from '../Wallet';
 
 export default function Header() {
     return (
-        <div className="flex flex-row justify-center bg-cyan-600 h-24">
+        <div className="flex flex-row justify-center bg-cyan-600 h-24 relative">
             <h1 className="font-FredokaOne text-6xl p-2 text-gray-50">Mask </h1>
             <svg className="h-20 w-20 flex-no-shrink fill-current m-2" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
                 <g id="Fill_Outline" data-name="Fill Outline">
@@ -47,6 +48,9 @@ export default function Header() {
                 </g>
             </svg>
             <h1 className="font-FredokaOne text-6xl p-2 text-gray-50">Mint</h1>
+            <div className="absolute inset-y-6 right-4">
+                <ConnectWallet></ConnectWallet>
+            </div>
         </div>
     )
 }

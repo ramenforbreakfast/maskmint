@@ -2,13 +2,11 @@ import React from 'react'
 import Header from '../Header'
 import NavBar from '../NavBar'
 import Footer from '../Footer'
-
-interface Props {
-    children: React.ReactNode
+interface PageProps {
+    children: React.ReactNode;
 }
 
-export default function Page(props: Props) {
-    const { children } = props
+export default function Page({ children, ...walletProps }: PageProps) {
     return (
         <div className="flex flex-col h-screen">
             <Header />
