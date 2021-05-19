@@ -30,10 +30,10 @@ function App() {
               <About></About>
             </Route>
             <Route path="/browse">
-              <Browse masks={mockData}></Browse>
+              <Browse></Browse>
             </Route>
             <Route path="/manage">
-              <Manage masks={mockData}></Manage>
+              <Manage></Manage>
             </Route>
             <Route path="/sponsor">
               <Sponsor></Sponsor>

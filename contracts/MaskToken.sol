@@ -10,9 +10,10 @@ import {
 } from "../libs/hashmasks/openzeppelin/ERC721/IERC721.sol";
 
 contract MaskToken is ERC20Upgradeable {
-    uint256 public maskID;
     NCT_IERC20 private nctContract;
     HM_IERC721 private maskContract;
+
+    uint256 private _maskID;
 
     uint256 constant SECONDS_IN_A_DAY = 86400;
     uint256 constant EMISSION_PER_DAY = 10 * (10**18);
@@ -21,7 +22,7 @@ contract MaskToken is ERC20Upgradeable {
     using SafeMath for uint256;
 
     modifier onlyForMaskOwner(address minter) {
-        address maskOwner = maskContract.ownerOf(maskID);
+        address maskOwner = maskContract.ownerOf(_maskID);
         require(
             minter == maskOwner,
             "Operation may only be performed by mask owner!"
@@ -45,9 +46,16 @@ contract MaskToken is ERC20Upgradeable {
         address maskContractAddress
     ) public initializer {
         __ERC20_init(name_, symbol_);
-        maskID = maskID_;
+        _maskID = maskID_;
         nctContract = NCT_IERC20(nctContractAddress);
         maskContract = HM_IERC721(maskContractAddress);
+    }
+
+    /**
+     * @dev Returns maskID of the token
+     */
+    function maskID() public view returns (uint256) {
+        return _maskID;
     }
 
     function nctAccumulated() internal view returns (uint256 currAccumulated) {
@@ -60,7 +68,7 @@ contract MaskToken is ERC20Upgradeable {
     }
 
     function mint(uint256 amount) external {
-        address maskOwner = maskContract.ownerOf(maskID);
+        address maskOwner = maskContract.ownerOf(_maskID);
         uint256 maxSupply = nctAccumulated();
         require(
             (totalSupply() + amount) <= maxSupply,

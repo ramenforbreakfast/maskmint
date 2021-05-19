@@ -4,11 +4,13 @@ import { BigNumber } from 'ethers';
 export type EditCardProps = {
     tokenSym: string;
     tokenName: string;
+    tokenBal: string
+    tokenAddr: string;
     maskName: string;
     maskID: number;
 }
 
-export function EditCard({ tokenSym, tokenName, maskName, maskID }: EditCardProps) {
+export function EditCard({ tokenSym, tokenName, tokenBal, tokenAddr, maskName, maskID }: EditCardProps) {
     const [mintAmt, setMintAmt] = React.useState("");
     const [burnAmt, setBurnAmt] = React.useState("");
     const [newName, setNewName] = React.useState("");

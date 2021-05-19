@@ -18,8 +18,8 @@ contract MaskMint {
     HM_IERC721 private maskContract;
 
     address immutable tokenImplementation;
-    address public nctContractAddress;
-    address public maskContractAddress;
+    address immutable nctContractAddress;
+    address immutable maskContractAddress;
 
     uint256 public constant MAX_NFT_SUPPLY = 16384;
 

@@ -5,23 +5,6 @@ import { initNotify, initOnboard } from "../services/walletServices";
 import { getDeployedContracts } from "../contracts/getDeployedContracts";
 import { getOwnedMasks } from "../contracts/getOwnedMasks";
 
-/*
-import {
-  getUserRewards,
-  getNetworkStats,
-  calculateMistRewards,
-} from "../contracts/aludel";
-
-import { formatUnits } from "@ethersproject/units";
-import { useQuery, useLazyQuery } from "@apollo/client";
-import { config } from "../config/app";
-import {
-  GET_PRICES,
-  GET_UNISWAP_MINTS,
-  createPairHistoryQuery,
-} from "../queries/uniswap";
-*/
-
 const Web3Context = React.createContext<{
     web3: Web3ProviderType;
     address: null | string;
@@ -31,7 +14,7 @@ const Web3Context = React.createContext<{
     provider: any;
     signer: any;
     monitorTx: (hash: string) => Promise<void>;
-    reloadData: () => Promise<any>;
+    reloadWallet: () => Promise<any>;
     masks: number[];
     deployed: string[];
     network: any;
@@ -44,7 +27,7 @@ const Web3Context = React.createContext<{
     provider: null,
     signer: null,
     monitorTx: async () => undefined,
-    reloadData: async () => undefined,
+    reloadWallet: async () => undefined,
     masks: [],
     deployed: [],
     network: null,
@@ -73,13 +56,14 @@ const Web3Provider: React.FC = (props) => {
             setProvider(ethersProvider);
             setSigner(signer);
             window.localStorage.setItem("selectedWallet", wallet.name);
-            getOwnedMasks(signer, ethersProvider)
+            getOwnedMasks(signer)
                 .then((ownedMasks) => {
                     setMasks(ownedMasks)
+                    console.log("Updating ownedMasks: ", ownedMasks)
                 }
                 );
-        },
-        []);
+        }, [address]
+    );
 
     useEffect(() => {
         const onboard = initOnboard({
@@ -123,7 +107,7 @@ const Web3Provider: React.FC = (props) => {
         return ready;
     }
 
-    function reloadData() {
+    function reloadWallet() {
         return new Promise((resolve) => resolve(updateWallet(wallet)));
     }
 
@@ -159,7 +143,7 @@ const Web3Provider: React.FC = (props) => {
                 signer,
                 provider,
                 monitorTx,
-                reloadData,
+                reloadWallet,
                 masks,
                 deployed,
                 network,
