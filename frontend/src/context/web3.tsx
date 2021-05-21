@@ -60,8 +60,10 @@ const Web3Provider: React.FC = (props) => {
                 .then((ownedMasks) => {
                     setMasks(ownedMasks)
                     console.log("Updating ownedMasks: ", ownedMasks)
-                }
-                );
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         }, [address]
     );
 
