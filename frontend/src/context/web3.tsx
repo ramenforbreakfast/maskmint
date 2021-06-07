@@ -127,7 +127,7 @@ const Web3Provider: React.FC = (props) => {
 
     async function monitorTx(hash: string) {
         const { emitter } = notify.hash(hash);
-        const networkName = network === 1 ? "mainnet" : "rinkeby";
+        const networkName = network === 1 ? "mainnet" : "ropsten";
         interface Transaction {
             hash: string;
         }

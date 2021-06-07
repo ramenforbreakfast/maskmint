@@ -9,9 +9,16 @@ import { HardhatUserConfig } from 'hardhat/types'
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
+const ALCHEMY_KEY = process.env.ALCHEMY_KEY;
+const ONE_PRIVATE_KEY = process.env.ONE_PRIVATE_KEY;
+
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
+    ropsten: {
+      url: 'https://eth-ropsten.alchemyapi.io/v2/' + ALCHEMY_KEY,
+      accounts: [`0x${ONE_PRIVATE_KEY}`]
+    },
     hardhat: {
       mining: {
         auto: false,
