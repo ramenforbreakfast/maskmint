@@ -11,6 +11,14 @@ import { HardhatUserConfig } from 'hardhat/types'
  */
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
+  networks: {
+    hardhat: {
+      mining: {
+        auto: false,
+        interval: 5000
+      }
+    }
+  },
   solidity: {
     compilers: [
       {

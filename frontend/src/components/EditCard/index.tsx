@@ -1,18 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { BigNumber } from 'ethers';
 import Web3Context from '../../context/web3';
+import { deployToken } from '../../contracts/deployToken';
+import { approveAndMint } from '../../contracts/approveAndMint';
 import { callTokenFunction } from '../../contracts/callTokenFunctions';
 
 export type EditCardProps = {
-    tokenSym: string;
-    tokenName: string;
-    tokenBal: string
-    tokenAddr: string;
+    deployed: boolean;
+    tokenSym?: string;
+    tokenName?: string;
+    tokenBal?: string
+    tokenAddr?: string;
     maskName: string;
     maskID: number;
 }
 
-export function EditCard({ tokenSym, tokenName, tokenBal, tokenAddr, maskName, maskID }: EditCardProps) {
+export function EditCard({ deployed, tokenSym, tokenName, tokenBal, tokenAddr, maskName, maskID }: EditCardProps) {
     const { signer, monitorTx, readyToTransact } = useContext(Web3Context);
 
     const [mintAmt, setMintAmt] = React.useState("");
@@ -36,7 +39,9 @@ export function EditCard({ tokenSym, tokenName, tokenBal, tokenAddr, maskName, m
     const submitMint = () => {
         try {
             readyToTransact().then(() => {
-                callTokenFunction(monitorTx, signer, tokenAddr, "mint", mintAmt).then(() => { })
+                if (tokenAddr) {
+                    approveAndMint(monitorTx, signer, tokenAddr, mintAmt).then(() => { })
+                }
             })
         } catch (err) {
             console.log(err);
@@ -45,7 +50,9 @@ export function EditCard({ tokenSym, tokenName, tokenBal, tokenAddr, maskName, m
     const submitBurn = () => {
         try {
             readyToTransact().then(() => {
-                callTokenFunction(monitorTx, signer, tokenAddr, "burn", burnAmt).then(() => { })
+                if (tokenAddr) {
+                    callTokenFunction(monitorTx, signer, tokenAddr, "burn", burnAmt).then(() => { })
+                }
             });
         } catch (err) {
             console.log(err);
@@ -54,7 +61,9 @@ export function EditCard({ tokenSym, tokenName, tokenBal, tokenAddr, maskName, m
     const submitName = () => {
         try {
             readyToTransact().then(() => {
-                callTokenFunction(monitorTx, signer, tokenAddr, "changeName", newName).then(() => { })
+                if (tokenAddr) {
+                    callTokenFunction(monitorTx, signer, tokenAddr, "changeName", newName).then(() => { })
+                }
             });
         } catch (err) {
             console.log(err);
@@ -63,7 +72,19 @@ export function EditCard({ tokenSym, tokenName, tokenBal, tokenAddr, maskName, m
     const submitSym = () => {
         try {
             readyToTransact().then(() => {
-                callTokenFunction(monitorTx, signer, tokenAddr, "changeSymbol", newSym).then(() => { })
+                if (tokenAddr) {
+                    callTokenFunction(monitorTx, signer, tokenAddr, "changeSymbol", newSym).then(() => { })
+                }
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const deployContract = () => {
+        try {
+            readyToTransact().then(() => {
+                deployToken(monitorTx, signer, newName, newSym, maskID).then(() => { })
             });
         } catch (err) {
             console.log(err);
@@ -78,34 +99,56 @@ export function EditCard({ tokenSym, tokenName, tokenBal, tokenAddr, maskName, m
                 <h3 className="text-xl font-mono">Mask #{maskID}</h3>
                 <h3 className="text-xl italic font-mono">"{maskName}"</h3>
             </div>
-            <div className="flex flex-col m-2">
-                <button className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg bg-blue-700 border-blue-800 font-mono text-white"
-                    onClick={submitMint}>
-                    Mint
-                </button>
-                <button className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg bg-blue-700 border-blue-800 font-mono text-white"
-                    onClick={submitBurn}>
-                    Burn
-                </button>
-            </div>
-            <div className="flex flex-col m-2">
-                <input className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" type="text" value={mintAmt} onChange={changeMint}></input>
-                <input className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" type="text" value={burnAmt} onChange={changeBurn}></input>
-            </div>
-            <div className="flex flex-col m-2">
-                <button className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg bg-blue-700 border-blue-800 font-mono text-white"
-                    onClick={submitName}>
-                    Change Token Name
-                </button>
-                <button className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg bg-blue-700 border-blue-800 font-mono text-white"
-                    onClick={submitSym}>
-                    Change Token Symbol
-                </button>
-            </div>
-            <div className="flex flex-col m-2">
-                <input className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" type="text" value={newName} onChange={changeName}></input>
-                <input className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" type="text" value={newSym} onChange={changeSym}></input>
-            </div>
+            {deployed
+                ?
+                <React.Fragment>
+                    <div className="flex flex-col m-2">
+                        <button className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg bg-blue-700 border-blue-800 font-mono text-white"
+                            onClick={submitMint}>
+                            Mint
+                        </button>
+                        <button className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg bg-blue-700 border-blue-800 font-mono text-white"
+                            onClick={submitBurn}>
+                            Burn
+                        </button>
+                    </div>
+                    <div className="flex flex-col m-2">
+                        <input className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" type="text" value={mintAmt} onChange={changeMint}></input>
+                        <input className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" type="text" value={burnAmt} onChange={changeBurn}></input>
+                    </div>
+                    <div className="flex flex-col m-2">
+                        <button className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg bg-blue-700 border-blue-800 font-mono text-white"
+                            onClick={submitName}>
+                            Change Token Name
+                        </button>
+                        <button className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg bg-blue-700 border-blue-800 font-mono text-white"
+                            onClick={submitSym}>
+                            Change Token Symbol
+                        </button>
+                    </div>
+                    <div className="flex flex-col m-2">
+                        <input className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" type="text" value={newName} onChange={changeName}></input>
+                        <input className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" type="text" value={newSym} onChange={changeSym}></input>
+                    </div>
+                </React.Fragment>
+                :
+                <React.Fragment>
+                    <div className="flex flex-col m-2">
+                        <input type="text" name="deployName" id="deployName" className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" placeholder="Token Name"
+                            value={newName} onChange={changeName} />
+                    </div>
+                    <div className="flex flex-col m-2">
+                        <input type="text" name="deploySym" id="deploySym" className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg" placeholder="Token Symbol"
+                            value={newSym} onChange={changeSym} />
+                    </div>
+                    <div className="flex flex-col m-2">
+                        <button className="rounded px-3 py-2 m-1 border-b-4 border-l-2 shadow-lg bg-blue-700 border-blue-800 font-mono text-white"
+                            onClick={deployContract}>
+                            Deploy
+                        </button>
+                    </div>
+                </React.Fragment>
+            }
         </div>
     )
 }

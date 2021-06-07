@@ -50,6 +50,7 @@ const Web3Provider: React.FC = (props) => {
 
     const updateWallet = useCallback(
         (wallet: any) => {
+            console.log("updating wallet");
             setWallet(wallet);
             const ethersProvider = new ethers.providers.Web3Provider(wallet.provider);
             let signer = ethersProvider.getSigner();
@@ -64,8 +65,19 @@ const Web3Provider: React.FC = (props) => {
                 .catch((err) => {
                     console.log(err);
                 });
-        }, [address]
+        }, []
     );
+
+    useEffect(() => {
+        getOwnedMasks(signer)
+            .then((ownedMasks) => {
+                setMasks(ownedMasks)
+                console.log("Updating ownedMasks: ", ownedMasks)
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, [address]);
 
     useEffect(() => {
         const onboard = initOnboard({

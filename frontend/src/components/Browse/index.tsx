@@ -48,10 +48,17 @@ export function Browse() {
 
     return (
         <div className="flex flex-row flex-wrap p-4 justify-center">
-            {cardData.map((mask, index) => {
-                const cardKey = "browse" + mask.maskID;
-                return <MaskCard key={cardKey} tokenSym={mask.tokenSym} tokenName={mask.tokenName} tokenBal={mask.tokenBal} tokenAddr={mask.tokenAddr} maskName={mask.maskName} maskID={mask.maskID} ></MaskCard>
-            })}
+            {cardData.length > 0
+                ?
+                cardData.map((mask, index) => {
+                    const cardKey = "browse" + mask.maskID;
+                    return <MaskCard key={cardKey} tokenSym={mask.tokenSym} tokenName={mask.tokenName} tokenBal={mask.tokenBal} tokenAddr={mask.tokenAddr} maskName={mask.maskName} maskID={mask.maskID} ></MaskCard>
+                })
+                :
+                <h1 className="text-gray-500 font-mono text-3xl">
+                    No Mask Tokens Deployed Yet...
+                </h1>
+            }
         </div >
     )
 }
