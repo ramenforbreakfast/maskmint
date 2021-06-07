@@ -9,7 +9,7 @@ async function main() {
     let userAddresses = await ethers.getSigners();
 
     owner = userAddresses[0];
-    console.log("Showing First 5 Addresses...");
+    console.log("Showing First Account");
     console.log("Address: ", owner.address);
     console.log("Balance: ", (await owner.getBalance()).toString());
 
