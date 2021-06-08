@@ -1,5 +1,18 @@
 import { run, ethers } from "hardhat";
 
+/*
+Ropsten Deployment
+--------------------------------------------------------------------------
+Address:  0xd9e45aCBc01D5713cd00D7b834733D5Ee2511CA0
+Balance:  1100000000000000000
+NCT Contract Deployed At:  0x27AF8A2B6FB0925e45a262809C75558D6525b10d
+HashMask Contract Deployed At:  0x008c8647b050cDc0771EcD08fA31C156Af2Da100
+Mask Mint:  0x662B8c706a748eD7AC982dD0E00F7260F09D2822
+NCT Balance of Owner:  12541036342592592592592
+Mask Token Zero Deployed At:  0x7B94c456851AdA867AF2bbfFd089184c05c8c38C
+Mask Token Two Deployed At:  0xC11d5C79690A47A57Ca3AFF56EbeA34EDC31E85A
+*/
+
 async function main() {
     let i;
     let tx, txReceipt;

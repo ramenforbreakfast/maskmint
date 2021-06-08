@@ -9,21 +9,38 @@ import { HardhatUserConfig } from 'hardhat/types'
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
+const chainIds = {
+  ganache: 1337,
+  goerli: 5,
+  hardhat: 31337,
+  kovan: 42,
+  mainnet: 1,
+  rinkeby: 4,
+  ropsten: 3,
+};
+
 const ALCHEMY_KEY = process.env.ALCHEMY_KEY;
-const ONE_PRIVATE_KEY = process.env.ONE_PRIVATE_KEY;
+const MNEMONIC_PATH = "m/44'/60'/0'/0";
+const MNEMONIC = process.env.MNEMONIC || '';
 
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
-    ropsten: {
-      url: 'https://eth-ropsten.alchemyapi.io/v2/' + ALCHEMY_KEY,
-      accounts: [`0x${ONE_PRIVATE_KEY}`]
-    },
     hardhat: {
       mining: {
         auto: false,
         interval: 5000
       }
+    },
+    ropsten: {
+      chainId: chainIds['ropsten'],
+      url: "https://eth-ropsten.alchemyapi.io/v2/" + ALCHEMY_KEY,
+      accounts: {
+        mnemonic: MNEMONIC,
+        path: MNEMONIC_PATH,
+        initialIndex: 0,
+        count: 20,
+      },
     }
   },
   solidity: {
