@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { BigNumber } from 'ethers';
+import React, { useContext } from 'react'
 import Web3Context from '../../context/web3';
 import { deployToken } from '../../contracts/deployToken';
 import { approveAndMint } from '../../contracts/approveAndMint';

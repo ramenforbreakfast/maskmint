@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import Web3Context from "../../context/web3";
 
 export function ConnectWallet() {
-  const { wallet, address, onboard, readyToTransact } = useContext(Web3Context);
+  const { wallet, address, readyToTransact } = useContext(Web3Context);
 
   const handleClick = () => (!wallet.provider ? readyToTransact() : null);
 

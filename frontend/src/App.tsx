@@ -12,15 +12,6 @@ import './App.css';
 
 function App() {
 
-
-  const mockData = [
-    { tokenSym: "WHA", tokenName: "WhaleCoin", maskName: "whale", maskID: 0 },
-    { tokenSym: "TRMP", tokenName: "TrumpBucks", maskName: "Trump", maskID: 1 },
-    { tokenSym: "PRC", tokenName: "RenMenBee", maskName: "china", maskID: 4 },
-    { tokenSym: "NXLJ", tokenName: "LiaoJie", maskName: "Na Xie Liao Jie", maskID: 12459 },
-    { tokenSym: "SGHY", tokenName: "Yuan", maskName: "Shan Gao Huangdi Yuan", maskID: 15960 }
-  ];
-
   return (
     <BrowserRouter>
       <Web3Provider>

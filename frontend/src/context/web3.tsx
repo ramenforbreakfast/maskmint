@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect } from "react";
 import { ethers } from "ethers";
 import { Web3Provider as Web3ProviderType } from "../types";
 import { initNotify, initOnboard } from "../services/walletServices";
-import { getDeployedContracts } from "../contracts/getDeployedContracts";
 import { getOwnedMasks } from "../contracts/getOwnedMasks";
 
 const Web3Context = React.createContext<{
@@ -77,7 +76,7 @@ const Web3Provider: React.FC = (props) => {
             .catch((err) => {
                 console.log(err);
             });
-    }, [address]);
+    }, [signer, address]);
 
     useEffect(() => {
         const onboard = initOnboard({

@@ -33,7 +33,7 @@ const config: HardhatUserConfig = {
       }
     },
     ropsten: {
-      chainId: chainIds['ropsten'],
+      chainId: chainIds.ropsten,
       url: "https://eth-ropsten.alchemyapi.io/v2/" + ALCHEMY_KEY,
       accounts: {
         mnemonic: MNEMONIC,
@@ -41,6 +41,16 @@ const config: HardhatUserConfig = {
         initialIndex: 0,
         count: 20,
       },
+    },
+    mainnet: {
+      chainId: chainIds.mainnet,
+      url: "https://eth-mainnet.alchemyapi.io/v2/" + ALCHEMY_KEY,
+      accounts: {
+        mnemonic: MNEMONIC,
+        path: MNEMONIC_PATH,
+        initialIndex: 0,
+        count: 20,
+      }
     }
   },
   solidity: {

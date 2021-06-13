@@ -57,13 +57,15 @@ export default function Manage() {
 
     return (
         <div className="flex flex-col items-center">
-            {masks.length > 0
+            {cardData.size > 0
                 ?
                 masks.map((mask, index) => {
                     const cardKey = "manage" + mask;
                     const maskData = cardData.get(mask);
                     if (maskData) {
                         return <EditCard key={cardKey} deployed={maskData.deployed} tokenSym={maskData.tokenSym} tokenName={maskData.tokenName} tokenBal={maskData.tokenBal} tokenAddr={maskData.tokenAddr} maskName={maskData.maskName} maskID={maskData.maskID} ></EditCard>
+                    } else {
+                        return <div></div>
                     }
                 })
                 :

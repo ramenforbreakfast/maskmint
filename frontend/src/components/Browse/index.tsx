@@ -56,7 +56,7 @@ export function Browse() {
                 })
                 :
                 <h1 className="text-gray-500 font-mono text-3xl">
-                    No Mask Tokens Deployed Yet...
+                    No Deployed Tokens Found, Have You Connected A Wallet?
                 </h1>
             }
         </div >

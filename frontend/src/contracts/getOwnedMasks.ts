@@ -3,7 +3,6 @@ import Masks from "./Masks.json";
 import { config } from "../config/app";
 
 export async function getOwnedMasks(signer: any) {
-    console.log("Entered getOwnedMasks");
     const walletAddress = await signer.getAddress();
     const masksContract = new ethers.Contract(config.hashmaskAddress, Masks.abi, signer);
     const balance = await masksContract.balanceOf(walletAddress);

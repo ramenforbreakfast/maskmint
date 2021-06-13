@@ -4,7 +4,6 @@ import { config } from "../config/app";
 
 export async function getMaskName(signer: any, maskID: number) {
     const maskContract = new ethers.Contract(config.hashmaskAddress, Masks.abi, signer);
-    console.log("Entered getMaskName");
     const [
         maskName
     ] = await Promise.all([

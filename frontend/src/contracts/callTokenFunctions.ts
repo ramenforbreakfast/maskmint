@@ -1,4 +1,4 @@
-import { errors, ethers } from "ethers";
+import { ethers } from "ethers";
 import MaskToken from "./MaskToken.json";
 
 export async function callTokenFunction(

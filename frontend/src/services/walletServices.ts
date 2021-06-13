@@ -57,6 +57,9 @@ export function initOnboard(subscriptions: Subscriptions): OnboardAPI {
 }
 
 export function initNotify(): NotifyAPI {
+    console.log("initializing Notify...")
+    console.log("dappId: ", dappId)
+    console.log("networkId: ", networkId)
     return Notify({
         dappId,
         networkId,
