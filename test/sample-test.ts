@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+import { expect } from "chai";
+import { run, ethers } from "hardhat";
 
 let owner, addr1, addr2, addr3, addr4;
 let mask, nct, maskMint, tokenZero, tokenTwo;
@@ -33,6 +33,8 @@ describe("Testing Mask Mint & Mask Token Contracts", function () {
   it("Acquire Hashmasks For Test Accounts", async function () {
     await mask.connect(addr1).mintNFT(2, { value: ethers.utils.parseEther("0.2") });
     await mask.connect(addr2).mintNFT(2, { value: ethers.utils.parseEther("0.2") });
+    console.log("Number of Masks: ", await mask.balanceOf(addr1.address));
+    console.log("Number of Masks: ", await mask.balanceOf(addr2.address));
   });
 
   it("Claim NCT For Test Accounts", async function () {
