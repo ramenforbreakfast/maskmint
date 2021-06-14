@@ -1,7 +1,0 @@
-.navlink {
-    @apply pt-1 px-2 m-2 text-xl font-FredokaOne text-gray-100
-}
-
-.active {
-    @apply underline
-}
